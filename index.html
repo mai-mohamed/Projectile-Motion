@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Projectile Motion</title>
+  </head>
+  <style>
+    html,
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      outline: unset;
+    }
+    .projectile-motion__wrapper {
+      background: #dcddde;
+      height: 100vh;
+      position: relative;
+    }
+    .projectile-motion__wrapper::before,
+    .projectile-motion__wrapper::after {
+      position: absolute;
+      content: "";
+      background-color: #000000;
+    }
+    .projectile-motion__wrapper::before {
+      left: 20px;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+    }
+    .projectile-motion__wrapper::after {
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+    #ball {
+      background-color: #ce2f27;
+      border-radius: 50%;
+      bottom: 23px;
+      height: 25px;
+      left: 23px;
+      position: absolute;
+      width: 25px;
+      z-index: 2;
+    }
+    .simulator-line {
+      background-color: #000;
+      border-radius: 50%;
+      bottom: 23px;
+      height: 4px;
+      left: 23px;
+      position: absolute;
+      width: 4px;
+      z-index: 2;
+    }
+    .container {
+      width: 80%;
+      margin: 0 auto;
+    }
+    .d-flex {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    button,
+    input {
+      border-radius: 5px;
+      box-shadow: unset;
+      border: unset;
+      margin: 20px 5px;
+    }
+    button {
+      padding: 5px 20px;
+      cursor: pointer;
+    }
+    input {
+      padding: 5px;
+    }
+    #errMessage {
+      color: tomato;
+      display: none;
+      text-align: center;
+    }
+  </style>
+  <body>
+    <div class="projectile-motion__wrapper">
+      <div class="container d-flex">
+        <form id="projectileForm">
+          <input type="number" name="vilocityInput" placeholder="vilocity" />
+          <input type="number" name="angleInput" placeholder="angle" />
+          <button type="submit" name="simulator-line" id="submitBtn">
+            start
+          </button>
+        </form>
+        <button id="restartBtn">Restart</button>
+      </div>
+      <p id="errMessage">please enter a value</p>
+      <div id="ball"></div>
+    </div>
+  </body>
+  <script>
+    const gravity = 9.8,
+      pi = 3.1415;
+
+    let positionX = 0,
+      positionY = 0,
+      time = 0,
+      ang = 0,
+      speed = 0,
+      rad = 0,
+      vox = 0,
+      voy = 0,
+      x = 0,
+      y = 0,
+      initialXPosition = 20,
+      initialYPosition = 20,
+      loop = false,
+      moveLogic,
+      isPathOn = false;
+
+    function onLoad() {
+      let ball = document.getElementById("ball");
+      let speedBox = document.getElementById("speedBox");
+      let angleBox = document.getElementById("angleBox");
+      let projectileForm = document.getElementById("projectileForm");
+      let restartBtn = document.getElementById("restartBtn");
+      let errMessage = document.getElementById("errMessage");
+    }
+
+    projectileForm.addEventListener("submit", handleSubmitProjectileMotion);
+    restartBtn.addEventListener("click", restart);
+
+    function handleSubmitProjectileMotion(e) {
+      e.preventDefault();
+      speed = projectileForm.vilocityInput.value;
+      ang = projectileForm.angleInput.value;
+      if (speed == "" || ang == "") {
+        errMessage.style.display = "block";
+      } else {
+        projectileForm.submitBtn.setAttribute("disabled", true);
+        start();
+      }
+    }
+
+    function start() {
+      rad = (ang * pi) / 180;
+      vox = speed * Math.cos(rad);
+      voy = speed * Math.sin(rad);
+      moveLogic = setInterval(mainLoop, 80);
+    }
+
+    function restart() {
+      clearInterval(moveLogic);
+      ang = 0;
+      speed = 0;
+      time = 0;
+      ball.style.left = "23px";
+      ball.style.bottom = "23px";
+      let simulatorLineArr = document.getElementsByTagName("span");
+      Array.from(simulatorLineArr).forEach(function (element) {
+        element.remove();
+      });
+      projectileForm.submitBtn.removeAttribute("disabled");
+      projectileForm.vilocityInput.value = "";
+      projectileForm.angleInput.value = "";
+    }
+
+    function mainLoop() {
+      time += 0.2;
+      x = vox * time;
+      y = voy * time - 0.5 * gravity * (time * time);
+      positionX = x + 23;
+      positionY = initialYPosition + y;
+
+      ball.style.left = positionX + "px";
+      ball.style.bottom = positionY + "px";
+      createSimulator();
+
+      if (positionY <= 23) {
+        clearInterval(moveLogic);
+      }
+    }
+
+    function createSimulator() {
+      let simulator = document.createElement("span");
+      simulator.setAttribute("class", "simulator-line");
+      document.body.appendChild(simulator);
+      simulator.style.left = positionX + "px";
+      simulator.style.bottom = positionY + "px";
+    }
+  </script>
+</html>
